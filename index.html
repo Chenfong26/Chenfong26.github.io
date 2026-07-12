@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日常调教任务面板 - Daily Quest Panel</title>
+  <meta name="description" content="游戏化日常规矩与调教任务面板，包含进度条、倒计时、惩罚队列及成就徽章墙。">
+  <!-- 引入谷歌字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 音效开关及配置按钮浮窗 -->
+  <div class="quick-actions">
+    <button id="sound-toggle-btn" class="icon-btn" title="开关音效">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path id="sound-icon-path" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+      </svg>
+    </button>
+    <button id="settings-toggle-btn" class="icon-btn" title="面板设置">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="panel-wrapper">
+    <!-- 游戏面板主体 -->
+    <main class="quest-panel">
+      
+      <!-- 头部：日期、问候、评分 -->
+      <header class="panel-header">
+        <div class="header-top">
+          <div class="date-container">
+            <span class="label">SYSTEM DATE</span>
+            <span class="value" id="current-date">2026-07-12</span>
+          </div>
+          <div class="rating-container">
+            <span class="label">YESTERDAY EVAL</span>
+            <span class="value rating-value" id="yesterday-rating">A</span>
+          </div>
+        </div>
+
+        <div class="daddy-greeting">
+          <span class="greet-title">DOM COMMAND:</span>
+          <p class="greet-text" id="header-greeting">"今天也要做个乖孩子。"</p>
+        </div>
+
+        <!-- 整体进度条 -->
+        <div class="overall-progress">
+          <div class="progress-info">
+            <span class="progress-label">QUEST PROGRESS</span>
+            <span class="progress-percent" id="progress-text">0%</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%;"></div>
+            <div class="progress-bar-glow" id="progress-bar-glow" style="width: 0%;"></div>
+          </div>
+        </div>
+      </header>
+
+      <!-- 每日必做任务区 -->
+      <section class="panel-section" aria-label="每日任务">
+        <h2 class="section-title">
+          <span class="icon">⚡</span> 每日必做任务 (Daily Quests)
+        </h2>
+        <div class="quest-list" id="quests-container">
+          <!-- JS 动态填充任务 -->
+        </div>
+      </section>
+
+      <!-- 限时挑战区 -->
+      <section class="panel-section" aria-label="限时挑战">
+        <h2 class="section-title">
+          <span class="icon">⏱️</span> 限时挑战区 (Timed Challenge)
+        </h2>
+        <div class="challenge-card" id="challenge-card">
+          <div class="challenge-header">
+            <span class="challenge-badge">ACTIVE</span>
+            <h3 class="challenge-name" id="challenge-name">边缘控制耐力训练</h3>
+          </div>
+          <p class="challenge-desc" id="challenge-desc">保持边缘控制状态，直至倒计时结束，未经许可不得释放。</p>
+          
+          <div class="timer-display" id="timer-display">01:45:20</div>
+          
+          <!-- 倒计时进度条 -->
+          <div class="challenge-progress">
+            <div class="challenge-progress-fill" id="timer-progress-fill" style="width: 100%;"></div>
+          </div>
+          
+          <div class="challenge-controls">
+            <button class="btn btn-primary" id="timer-start-btn">开始</button>
+            <button class="btn btn-secondary" id="timer-pause-btn" disabled>暂停</button>
+            <button class="btn btn-outline" id="timer-reset-btn">重置</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 惩罚队列 -->
+      <section class="panel-section" aria-label="惩罚队列">
+        <h2 class="section-title">
+          <span class="icon">⛓️</span> 惩罚队列 (Penalty Queue)
+        </h2>
+        <div class="penalty-list" id="penalties-container">
+          <!-- JS 动态填充惩罚 -->
+        </div>
+      </section>
+
+      <!-- 成就徽章墙 -->
+      <section class="panel-section" aria-label="成就徽章">
+        <h2 class="section-title">
+          <span class="icon">🏅</span> 成就徽章墙 (Achievement Wall)
+        </h2>
+        <div class="badge-grid" id="achievements-container">
+          <!-- JS 动态填充成就 -->
+        </div>
+      </section>
+
+      <!-- Daddy评语区 -->
+      <footer class="panel-footer">
+        <div class="daddy-comment-box">
+          <span class="comment-label">DADDY'S COMMENT:</span>
+          <p class="comment-text" id="daddy-comment">"你的进度还远远不够，想在今晚接受惩罚吗？"</p>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- 面板设置侧边抽屉 -->
+  <div class="settings-drawer" id="settings-drawer">
+    <div class="drawer-header">
+      <h3>⚙️ 面板系统控制台</h3>
+      <button class="close-btn" id="settings-close-btn">&times;</button>
+    </div>
+    <div class="drawer-body">
+      
+      <!-- 基础设置 -->
+      <div class="settings-group">
+        <h4>基本设定</h4>
+        <div class="form-field">
+          <label for="set-date">系统日期</label>
+          <input type="date" id="set-date">
+        </div>
+        <div class="form-field">
+          <label for="set-yesterday-rating">昨日评分</label>
+          <select id="set-yesterday-rating">
+            <option value="S">S级 (极佳)</option>
+            <option value="A">A级 (优秀)</option>
+            <option value="B">B级 (良好)</option>
+            <option value="C">C级 (及格)</option>
+            <option value="D">D级 (违规/未达标)</option>
+            <option value="—">— (首日)</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="set-greeting">Dom晨间指令</label>
+          <textarea id="set-greeting" rows="2" placeholder="今天也要做个乖孩子。"></textarea>
+        </div>
+      </div>
+
+      <!-- 任务管理 -->
+      <div class="settings-group">
+        <h4>任务内容管理</h4>
+        <div class="task-manager" id="task-manager-list">
+          <!-- JS 动态生成任务配置项 -->
+        </div>
+        <button class="btn btn-sm btn-outline" id="add-custom-task" style="width:100%; margin-top:0.5rem;">+ 添加新任务</button>
+      </div>
+
+      <!-- 倒计时挑战管理 -->
+      <div class="settings-group">
+        <h4>限时挑战设定</h4>
+        <div class="form-field">
+          <label for="set-challenge-name">挑战名称</label>
+          <input type="text" id="set-challenge-name">
+        </div>
+        <div class="form-field">
+          <label for="set-challenge-desc">挑战描述</label>
+          <input type="text" id="set-challenge-desc">
+        </div>
+        <div class="form-field">
+          <label for="set-challenge-duration">倒计时长 (分钟)</label>
+          <input type="number" id="set-challenge-duration" min="1" max="1440">
+        </div>
+      </div>
+
+      <!-- 惩罚队列管理 -->
+      <div class="settings-group">
+        <h4>惩罚事项管理</h4>
+        <div class="penalty-manager" id="penalty-manager-list">
+          <!-- JS 动态生成惩罚项配置 -->
+        </div>
+        <button class="btn btn-sm btn-outline" id="add-custom-penalty" style="width:100%; margin-top:0.5rem;">+ 添加惩罚事项</button>
+      </div>
+
+      <!-- 重置与清空 -->
+      <div class="settings-group actions-group">
+        <button class="btn btn-secondary" id="reset-defaults-btn">恢复默认设置</button>
+        <button class="btn btn-danger" id="clear-data-btn">清空所有记录</button>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn btn-primary" id="save-settings-btn" style="width: 100%;">应用并保存</button>
+    </div>
+  </div>
+
+  <!-- 提示弹窗 (Toast Alert) -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- JavaScript 载入 -->
+  <script src="app.js"></script>
+</body>
+</html>
